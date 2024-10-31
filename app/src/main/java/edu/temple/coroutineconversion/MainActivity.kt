@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,20 +46,23 @@ class MainActivity : AppCompatActivity() {
         //        }
         //    }.start()
         //}
+        val scope = CoroutineScope(Job() + Dispatchers.Default)
         findViewById<Button>(R.id.revealButton).setOnClickListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                revealImage()
+            scope.launch{
+                repeat(100){
+                    withContext(Dispatchers.Main){
+                        currentTextView.text = String.format(Locale.getDefault(), "Current opacity: %d", it + 1)
+                        cakeImageView.alpha = it / 100f
+                    }
+                    delay(40)
+                }
+
             }
+
+
         }
 
     }
-    suspend fun revealImage() = withContext(Dispatchers.IO) {
-        repeat(100) { opacity ->
-            delay(40)
-            withContext(Dispatchers.Main) {
-                currentTextView.text = String.format(Locale.getDefault(), "Current opacity: %d", opacity + 1)
-                cakeImageView.alpha = (opacity + 1) / 100f
-            }
-        }
-    }
+
+
 }
